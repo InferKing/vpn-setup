@@ -28,7 +28,11 @@ cleanup() {
     if (( rc != 0 )); then
         printf '\nУстановка/проверка остановлена. Этап: %s.\n' "$STEP" >&2
         printf 'Ваш SSH не перенастраивался. Не удаляйте /etc/vpn-bootstrap.\n' >&2
-        printf 'Исправьте причину ошибки и запустите: bash setup-vpn.sh --resume\n' >&2
+        if [[ -f "$STATE/state.env" ]]; then
+            printf 'Исправьте причину ошибки и запустите: bash setup-vpn.sh --resume\n' >&2
+        else
+            printf 'Настройки ещё не сохранены. Повторите: bash setup-vpn.sh\n' >&2
+        fi
     fi
     exit "$rc"
 }
@@ -74,10 +78,10 @@ sys.exit(0 if ok and not s.replace('.', '').isdigit() else 1)
 PY
 }
 ask() {
-    local name=$1 prompt=$2 default=$3 answer
+    local name=$1 prompt=$2 default=$3 _ask_input
     printf '%s [%s]: ' "$prompt" "$default" > /dev/tty
-    IFS= read -r answer < /dev/tty || die 'Ввод прерван.'
-    printf -v "$name" '%s' "${answer:-$default}"
+    IFS= read -r _ask_input < /dev/tty || die 'Ввод прерван.'
+    printf -v "$name" '%s' "${_ask_input:-$default}"
 }
 ask_port() {
     local name=$1 prompt=$2 default=$3 value
