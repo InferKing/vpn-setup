@@ -124,7 +124,7 @@ prepare_firewall() {
     # the port used by this session. Put these rules ahead of possible denies.
     local p
     while read -r p; do
-        if valid_port "$p"; then ufw insert 1 allow "$p/tcp" comment 'SSH preserved by vpn-bootstrap'; fi
+        if valid_port "$p"; then ufw prepend allow "$p/tcp" comment 'SSH preserved by vpn-bootstrap'; fi
     done < <({ printf '%s\n' "$SSH_PORT"; /usr/sbin/sshd -T 2>/dev/null | awk '$1 == "port" {print $2}'; } | sort -un)
     ufw allow 80/tcp comment 'ACME IP certificate renewal'
     ufw default deny incoming
