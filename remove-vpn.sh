@@ -166,14 +166,14 @@ clean_firewall() {
     # Preserve both the actual SSH session port and effective sshd ports.
     if [[ -n "$ssh_server" ]] && valid_port "${ssh_port:-}"; then
         ssh_ports+=("$ssh_port")
-        ufw insert 1 allow "$ssh_port/tcp" comment 'SSH retained after VPN cleanup'
+        ufw prepend allow "$ssh_port/tcp" comment 'SSH retained after VPN cleanup'
     fi
     if [[ -x /usr/sbin/sshd ]]; then
         ssh_config=$(/usr/sbin/sshd -T 2>/dev/null) || die 'Не удалось прочитать SSH-порты. Правила UFW не удалены.'
         while read -r port; do
             if valid_port "$port"; then
                 ssh_ports+=("$port")
-                ufw insert 1 allow "$port/tcp" comment 'SSH retained after VPN cleanup'
+                ufw prepend allow "$port/tcp" comment 'SSH retained after VPN cleanup'
             fi
         done < <(printf '%s\n' "$ssh_config" | awk '$1 == "port" {print $2}')
     fi
