@@ -360,6 +360,10 @@ check_install() {
     say 'Локальные проверки пройдены. Доступность из вашей сети проверьте в HAPP после создания клиента.'
 }
 
+delete_setup_token() {
+    api POST "setting/apiTokens/delete/$1" --data-urlencode 'expectedScope=admin'
+}
+
 write_summary() {
     cat > "$STATE/access.txt" <<EOF
 Сервер: $SERVER_NAME
@@ -477,10 +481,11 @@ main() {
     check_install
     for p in "$VPN_PORT" "$PANEL_PORT" "$SUB_PORT"; do ufw allow "$p/tcp" comment 'VPN bootstrap'; done
     # Revoke the setup-only admin token. The panel password remains available.
+    STEP='удаление временного API-токена'
     api GET setting/apiTokens
     local token_id
     token_id=$(jq -r '.obj[] | select(.name == "vpn-bootstrap") | .id' "$WORK/response.json")
-    if [[ "$token_id" =~ ^[0-9]+$ ]]; then api POST "setting/apiTokens/delete/$token_id"; fi
+    if [[ "$token_id" =~ ^[0-9]+$ ]]; then delete_setup_token "$token_id"; fi
     write_summary
     mark_stage complete
     say 'Готово. Теперь создайте пользователей в панели; этот же скрипт запустите на втором сервере.'
