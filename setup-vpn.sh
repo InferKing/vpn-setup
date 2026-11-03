@@ -417,7 +417,9 @@ main() {
     STEP='зависимости Ubuntu'
     export DEBIAN_FRONTEND=noninteractive
     apt-get update
-    apt-get install -y --no-install-recommends ca-certificates curl jq openssl python3 \
+    say 'Установка зависимостей: если dpkg занят автообновлением Ubuntu, ожидание до 5 минут.'
+    # APT сам ожидает освобождения блокировок dpkg, в т.ч. после запуска unattended-upgrades.
+    apt-get -o DPkg::Lock::Timeout=300 install -y --no-install-recommends ca-certificates curl jq openssl python3 \
         tar gzip socat ufw iproute2 util-linux tzdata
     if [[ ! -f "$STATE/state.env" ]]; then
         case "$(uname -m)" in x86_64) ARCH=amd64 ;; aarch64|arm64) ARCH=arm64 ;; *) die 'Нужна архитектура amd64 или arm64.' ;; esac
